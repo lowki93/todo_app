@@ -192,3 +192,170 @@ def completed?
   !completed_at.blank?  
 end
 ```
+
+### Add Style
+rename the file in `app/assets/stylesheets/` -> `application.css` in `application.scss`
+copy `https://github.com/mackenziechild/Todo-App` application.scss
+
+In `app/views/layouts/application.html.erb`, we put our `<%= yield %>` inside a container.
+```
+<div class="container">
+	<%= yield %>
+</div>
+```
+
+In `app/views/layouts/todo_lists/index.html.erb`, replace the content by:
+```
+<% @todo_lists.each do |todo_list| %>
+  <div class="index_row clearfix">
+    <h2 class="todo_list_title"><%= link_to todo_list.title, todo_list %></h2>
+    <p class="todo_list_sub_title"><%= todo_list.description %></p>
+  </div>
+<% end %>
+<div class="links">
+  <%= link_to "New Todo List", new_todo_list_path %>
+</div>
+```
+
+At the end of `app/assets/stylesheets/application.scss`, add:
+```
+.todo_list_title {
+ text-align: center;
+ font-weight: 700;
+ font-size: 2.5rem;
+ text-transform: uppercase;
+ color: white;
+ margin: 0;
+ a {
+  text-decoration: none;
+  color: white;
+  transition: all .4s ease-in-out;
+  &:hover {
+   opacity: 0.4;
+  }
+ }
+}
+	
+.todo_list_title {
+ text-align: center;
+ font-weight: 700;
+ font-size: 1.0rem;
+ text-transform: uppercase;
+ color: white;
+ margin: 0;
+ a {
+  text-decoration: none;
+  color: white;
+  transition: all .4s ease-in-out;
+  &:hover {
+   opacity: 0.4;
+  }
+ }
+}
+```
+
+In `app/views/layouts/application.html.erb`, before `<\head>`, add:
+```
+<link href='http://fonts.googleapis.com/css?family=Lato:300,400,700' rel='stylesheet' type='text/css'>
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+```
+
+In `app/views/todo_items/_todo_item.html.erb`, replace all content:
+```
+<div class="row clearfix">
+  <% if todo_item.completed? %>
+    <div class="complete">
+      <%= link_to complete_todo_list_todo_item_path(@todo_list, todo_item.id), method: :patch do %>
+        <i style="opacity: 0.4;" class="fa fa-check"></i>
+      <% end %>
+    </div>
+    <div class="todo_item">
+      <p style="opacity: 0.4;"><strike><%= todo_item.content %></strike></p>
+    </div>
+    <div class="trash">
+      <%= link_to "Delete", todo_list_todo_item_path(@todo_list, todo_item.id), method: :delete, data: { confirm: "Are you sure?" } %>
+    </div>
+  <% else %>
+    <div class="complete">
+      <%= link_to "Mark as Complete", complete_todo_list_todo_item_path(@todo_list, todo_item.id), method: :patch %>
+    </div>
+    <div class="todo_item">
+      <p><%= todo_item.content %></p>
+    </div>
+    <div class="trash">
+      <%= link_to "Delete", todo_list_todo_item_path(@todo_list, todo_item.id), method: :delete, data: { confirm: "Are you sure?" } %>
+    </div>
+  <% end %>
+</div>
+```
+
+updte the content between the `else` and the `end`
+```
+<div class="complete">
+	<%= link_to complete_todo_list_todo_item_path(@todo_list, todo_item.id), method: :patch do %>
+		<i class="fa fa-circle-thin"></i>
+	<% end %>
+</div>
+<div class="todo_item">
+	<p><%= todo_item.content %></p>
+</div>
+<div class="trash">
+	<%= link_to "Delete", todo_list_todo_item_path(@todo_list, todo_item.id), method: :delete, data: { confirm: "Are you sure?" } %>
+</div>
+```
+
+replace the content in `<div class="trash">`
+```
+<%= link_to todo_list_todo_item_path(@todo_list, todo_item.id), method: :delete, data: { confirm: "Are you sure?" } do %>
+	<i class="fa fa-trash"></i>
+<% end %>
+```
+
+In `app/views/todo_lists/show.html.erb`, replace the content by:
+```
+<p id="notice"><%= notice %></p>
+<h2 class="todo_list_title"><%= @todo_list.title %></h2>
+<p class="todo_list_sub_title"><%= @todo_list.description %></p>
+<div id="todo_items_wrapper">
+<%= render @todo_list.todo_items %>
+  <div id="form">
+    <%= render "todo_items/form" %>
+  </div>
+</div>
+<%= link_to 'Edit', edit_todo_list_path(@todo_list) %> |
+<%= link_to 'Back', todo_lists_path %>
+```
+
+encapsuled the two lonk a the end of the file by `<div class="links">` and `<\div>`
+add this between `edit` and `back`:
+`<%= link_to 'Delete', todo_list_path(@todo_list), method: :delete, data: { confirm: "Are you sure?" } %> |`
+
+
+in `app/controller/todo_lists_controller.rb`, we nee to update the `destroy` method:
+```
+@todo_list.destroy
+respond_to do |format|
+	format.html { redirect_to root_url, notice: 'Todo list was successfully destroyed.' }
+	format.json { head :no_content }
+end
+```
+In `app/views/todo_lists/new.html.erb`, replace the content by:
+```
+<h1 class="todo_list_title">New Todo List</h1>
+<div class="forms">
+  <%= render 'form', todo_list: @todo_list %>
+</div>
+<div class="links">
+  <%= link_to 'Back', todo_lists_path %>
+</div>
+```
+In `app/views/todo_lists/edit.html.erb`, replace the content by:
+```
+<h1 class="todo_list_title">Editing Todo List</h1>
+<div class="forms">
+  <%= render 'form', todo_list: @todo_list %>
+</div>
+<div class="links">
+  <%= link_to 'Cancel', todo_lists_path %>
+</div>
+```
